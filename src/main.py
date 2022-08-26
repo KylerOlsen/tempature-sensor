@@ -19,52 +19,65 @@ class ytd_HTTPRequestHandler(http.server.BaseHTTPRequestHandler):
         pass
 
 
-def load_tempature_data(filename):
-    """Loads data from a csv file and returns the data for a graph"""
+class tempature_data:
 
-    """
-    Field indexes
-        datetime : 0
-        index : 1
-        tempature : 2
-        bat-voltage : 3
-        wireless-strength : 4
-    """
+    def __init__(self,filename):
+        """Loads data from a csv file."""
 
-    with open(filename, 'r') as csv_file:
-        csv_reader = csv.reader(csv_file)
-        time_data = []
-        tempature_data = []
-        voltage_data = None
-        wireless_strength = []
-        for line in csv_reader:
-            time_data.append(datetime.datetime.fromisoformat(line[0]))
-            tempature_data.append(float(line[2]))
-            if voltage_data is None: voltage_data = float(line[3])
-            else: voltage_data = min(voltage_data,float(line[3]))
-            wireless_strength.append(int(line[4]))
-    
-        return {'datetime':time_data, 'tempature':tempature_data, 'min_bat_volts':voltage_data, 'wireless_strength':wireless_strength}
+        """
+        Field indexes
+            datetime : 0
+            index : 1
+            tempature : 2
+            bat-voltage : 3
+            wireless-strength : 4
+        """
 
-def get_tempature_graph(filename):
-    data = load_tempature_data(filename)
+        # Opens the file and initilazes varables to load data into
+        with open(filename, 'r') as csv_file:
+            csv_reader = csv.reader(csv_file)
+            self._datetime = []
+            self._tempature = []
+            self._bat_volts = []
+            self._wireless_strength = []
 
-    wifi_avg = sum(data['wireless_strength'])//len(data['wireless_strength'])
-    wifi_min = min(data['wireless_strength'])
-    wifi_max = max(data['wireless_strength'])
+            # Loads in the data, one line at a time
+            for line in csv_reader:
+                # Line date and time
+                self._datetime.append(datetime.datetime.fromisoformat(line[0]))
+                # Line tempature
+                self._tempature.append(float(line[2]))
+                # Line battery voltage
+                self._bat_volts.append(float(line[3]))
+                # Line wireless strength
+                self._wireless_strength.append(int(line[4]))
+        
+            # Calculate Battey and Wifi strength statistics
+            self._bat_volts_min = min(self._bat_volts)
+            self._wifi_avg = sum(self._wireless_strength)//len(self._wireless_strength)
+            self._wifi_min = min(self._wireless_strength)
+            self._wifi_max = max(self._wireless_strength)
 
-    print(f"Battery Level : {data['min_bat_volts']}, Wifi Strength : max {wifi_max} dBm, min {wifi_min} dBm, avg {wifi_avg} dBm")
+    def get_graph(self):
+        """Returns the graph for the data set as an image in a file-like object"""
+        fig, ax = plt.subplots()
+        ax.plot(self._datetime, self._tempature, linewidth=2.0)
+        ax.set_title('Tempature over Time')
+        ax.set_xlabel('Time')
+        ax.set_ylabel('Tempature')
+        labels = ax.get_xticklabels()
+        plt.setp(labels, rotation=25, horizontalalignment='right')
+        
+        img = io.BytesIO()
+        plt.savefig(img,format='png')
+        img.seek(0)
+        return img
 
-    fig, ax = plt.subplots()
-    ax.plot(data['datetime'], data['tempature'], linewidth=2.0)
-    ax.set_xlabel('Time')
-    ax.set_ylabel('Tempature')
-    labels = ax.get_xticklabels()
-    plt.setp(labels, rotation=45, horizontalalignment='right')
-    plt.show()
 
 def main():
-    get_tempature_graph("data/3000-Data.csv")
+    img = tempature_data("data/3000-Data.csv").get_graph()
+    with open("data/3000-Data.png", 'wb') as img_file:
+        img_file.write(img.read())
 
 if __name__ == "__main__":
     main()

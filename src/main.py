@@ -10,13 +10,43 @@ import datetime
 # installed imports
 import matplotlib.pyplot as plt
 
+
 class ytd_HTTPRequestHandler(http.server.BaseHTTPRequestHandler):
 
     def do_GET(self):
-        pass
+        try:
+            path = self.path[1:].split("/")
+            #print(self.path,path,get_csv_files())
+            if len(path) == 1 and path[0] in ["","index.html"]:
+                files = get_csv_files()
+                html = create_html_list(files).encode('utf-8')
+
+                self.send_response(200)
+                self.end_headers()
+                self.wfile.write(html)
+            elif len(path) == 2 and path[0] == 'data' and path[1] in get_csv_files():
+                img = tempature_data(f"data/{path[1]}.csv").get_graph()
+                
+                self.send_response(200)
+                self.end_headers()
+                self.wfile.write(img.read())
+            else:
+                self.send_response(404)
+                self.end_headers()
+        except Exception:
+            self.send_response(500)
+            self.end_headers()
+            raise
 
     def do_POST(self):
-        pass
+        try:
+            path = self.path[1:].split("/")
+            self.send_response(405)
+            self.end_headers()
+        except Exception:
+            self.send_response(500)
+            self.end_headers()
+            raise
 
 
 class tempature_data:
@@ -60,24 +90,67 @@ class tempature_data:
 
     def get_graph(self):
         """Returns the graph for the data set as an image in a file-like object"""
+
+        # Generates a plot for the file
         fig, ax = plt.subplots()
         ax.plot(self._datetime, self._tempature, linewidth=2.0)
+        # Add and format Labels
         ax.set_title('Tempature over Time')
         ax.set_xlabel('Time')
         ax.set_ylabel('Tempature')
+        ax.grid(True)
         labels = ax.get_xticklabels()
-        plt.setp(labels, rotation=25, horizontalalignment='right')
+        plt.setp(labels, rotation=20, horizontalalignment='right')
         
+        # Saves the figure (graph) as a png into a file like object
         img = io.BytesIO()
-        plt.savefig(img,format='png')
+        plt.savefig(img,format='png',bbox_inches='tight')
         img.seek(0)
         return img
 
 
+def create_html_list(data, template=(None, None)):
+    """Creates an HTML file listing all the given csv files"""
+    html = ""
+
+    # Concatenate the document header and the start of the body
+    if template[0] is None:
+        html += "<!DOCTYPE html><html><head><meta charset=\"utf-8\"/></head><body>"
+    else:
+        html += template[0]
+
+    # Concatenate a link to each csv file's graph
+    for i in data:
+        html += f"<a href=\"/data/{i}\">{i}</a><br>"
+    
+    # Concatenate the end of the body and the document footer
+    if template[1] is None:
+        html += "</body></html>"
+    else:
+        html += template[1]
+    
+    # Return the HTML document
+    return html
+
+def get_csv_files(directory="data/"):
+    """Returns a list of stored csv files"""
+
+    # Get a list of all stored files
+    directory_list = os.listdir(directory)
+
+    # Filter out and store all of the csv files
+    files = []
+    for i in directory_list:
+        if i.endswith(".csv"):
+            files.append(i.removesuffix(".csv"))
+    
+    # Return the list of csv files
+    return files
+
 def main():
-    img = tempature_data("data/3000-Data.csv").get_graph()
-    with open("data/3000-Data.png", 'wb') as img_file:
-        img_file.write(img.read())
+    # Set up and start server
+    httpd = http.server.ThreadingHTTPServer(('', 8080),ytd_HTTPRequestHandler)
+    httpd.serve_forever()
 
 if __name__ == "__main__":
     main()

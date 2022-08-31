@@ -6,6 +6,7 @@ import csv
 import os
 import io
 import datetime
+import sys
 
 # installed imports
 import matplotlib.pyplot as plt
@@ -148,8 +149,17 @@ def get_csv_files(directory="data/"):
     return files
 
 def main():
+
+    # Get port from command line arguments or set default
+    if ('-p' in sys.argv and
+        len(sys.argv) > sys.argv.index('-p') + 1 and
+        sys.argv[sys.argv.index('-p') + 1].isdecimal()):
+            port = int(sys.argv[sys.argv.index('-p') + 1])
+    else:
+        port = 8080
+
     # Set up and start server
-    httpd = http.server.ThreadingHTTPServer(('', 8080),ytd_HTTPRequestHandler)
+    httpd = http.server.ThreadingHTTPServer(('', port),ytd_HTTPRequestHandler)
     httpd.serve_forever()
 
 if __name__ == "__main__":

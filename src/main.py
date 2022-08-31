@@ -116,17 +116,20 @@ def create_html_list(data, template=(None, None)):
 
     # Concatenate the document header and the start of the body
     if template[0] is None:
-        html += "<!DOCTYPE html><html><head><meta charset=\"utf-8\"/></head><body>"
+        html += "<!DOCTYPE html><html><head><meta charset=\"utf-8\"/>\
+            <style>.container{display:grid;}.left{grid-column:1;}\
+            .right{grid-column:2;}</style></head>\
+            <body><div class=\"container\"><ul class=\"left\">"
     else:
         html += template[0]
 
     # Concatenate a link to each csv file's graph
     for i in data:
-        html += f"<a href=\"/data/{i}\">{i}</a><br>"
+        html += f"<li><a onclick=\"document.querySelector('img').src = '/data/{i}';\">{i}</a></li>"
     
     # Concatenate the end of the body and the document footer
     if template[1] is None:
-        html += "</body></html>"
+        html += "</ul><img class=\"right\"/></div></body></html>"
     else:
         html += template[1]
     

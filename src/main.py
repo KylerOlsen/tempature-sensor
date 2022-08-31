@@ -67,6 +67,7 @@ class tempature_data:
         # Opens the file and initilazes varables to load data into
         with open(filename, 'r') as csv_file:
             csv_reader = csv.reader(csv_file)
+            self.filename = filename
             self._datetime = []
             self._tempature = []
             self._bat_volts = []
@@ -96,9 +97,9 @@ class tempature_data:
         fig, ax = plt.subplots()
         ax.plot(self._datetime, self._tempature, linewidth=2.0)
         # Add and format Labels
-        ax.set_title('Tempature over Time')
-        ax.set_xlabel('Time')
-        ax.set_ylabel('Tempature')
+        ax.set_title(f"{self.filename.split('/')[-1]}: Tempature over Time")
+        ax.set_xlabel("Time")
+        ax.set_ylabel("Tempature")
         ax.grid(True)
         labels = ax.get_xticklabels()
         plt.setp(labels, rotation=20, horizontalalignment='right')
@@ -119,7 +120,8 @@ def create_html_list(data, template=(None, None)):
         html += "<!DOCTYPE html><html><head><meta charset=\"utf-8\"/>\
             <style>.container{display:grid;}.left{grid-column:1;}\
             .right{grid-column:2;}</style></head>\
-            <body><div class=\"container\"><ul class=\"left\">"
+            <body><div class=\"container\"><h1 class=\"left\">Select a data file:</h1>\
+            <ul class=\"left\">"
     else:
         html += template[0]
 

@@ -19,13 +19,13 @@ class ytd_HTTPRequestHandler(http.server.BaseHTTPRequestHandler):
             path = self.path[1:].split("/")
             #print(self.path,path,get_csv_files())
             if len(path) == 1 and path[0] in ["","index.html"]:
-                files = get_csv_files()
-                html = create_html_list(files).encode('utf-8')
+                files = tempature_data.get_csv_files()
+                html = tempature_data.create_html_list(files).encode('utf-8')
 
                 self.send_response(200)
                 self.end_headers()
                 self.wfile.write(html)
-            elif len(path) == 2 and path[0] == 'data' and path[1] in get_csv_files():
+            elif len(path) == 2 and path[0] == 'data' and path[1] in tempature_data.get_csv_files():
                 img = tempature_data(f"data/{path[1]}.csv").get_graph()
                 
                 self.send_response(200)
@@ -110,48 +110,50 @@ class tempature_data:
         img.seek(0)
         return img
 
+    @staticmethod
+    def create_html_list(data, template=(None, None)):
+        """Creates an HTML file listing all the given csv files"""
+        html = ""
 
-def create_html_list(data, template=(None, None)):
-    """Creates an HTML file listing all the given csv files"""
-    html = ""
+        # Concatenate the document header and the start of the body
+        if template[0] is None:
+            html += "<!DOCTYPE html><html><head><meta charset=\"utf-8\"/>\
+                <style>.container{display:grid;}.left{grid-column:1;}\
+                .right{grid-column:2;}</style></head>\
+                <body><div class=\"container\"><h1 class=\"left\">Select a data file:</h1>\
+                <ul class=\"left\">"
+        else:
+            html += template[0]
 
-    # Concatenate the document header and the start of the body
-    if template[0] is None:
-        html += "<!DOCTYPE html><html><head><meta charset=\"utf-8\"/>\
-            <style>.container{display:grid;}.left{grid-column:1;}\
-            .right{grid-column:2;}</style></head>\
-            <body><div class=\"container\"><h1 class=\"left\">Select a data file:</h1>\
-            <ul class=\"left\">"
-    else:
-        html += template[0]
+        # Concatenate a link to each csv file's graph
+        for i in data:
+            html += f"<li><a onclick=\"document.querySelector('img').src = '/data/{i}';\">{i}</a></li>"
+        
+        # Concatenate the end of the body and the document footer
+        if template[1] is None:
+            html += "</ul><img class=\"right\"/></div></body></html>"
+        else:
+            html += template[1]
+        
+        # Return the HTML document
+        return html
 
-    # Concatenate a link to each csv file's graph
-    for i in data:
-        html += f"<li><a onclick=\"document.querySelector('img').src = '/data/{i}';\">{i}</a></li>"
-    
-    # Concatenate the end of the body and the document footer
-    if template[1] is None:
-        html += "</ul><img class=\"right\"/></div></body></html>"
-    else:
-        html += template[1]
-    
-    # Return the HTML document
-    return html
+    @staticmethod
+    def get_csv_files(directory="data/"):
+        """Returns a list of stored csv files"""
 
-def get_csv_files(directory="data/"):
-    """Returns a list of stored csv files"""
+        # Get a list of all stored files
+        directory_list = os.listdir(directory)
 
-    # Get a list of all stored files
-    directory_list = os.listdir(directory)
+        # Filter out and store all of the csv files
+        files = []
+        for i in directory_list:
+            if i.endswith(".csv"):
+                files.append(i.removesuffix(".csv"))
+        
+        # Return the list of csv files
+        return files
 
-    # Filter out and store all of the csv files
-    files = []
-    for i in directory_list:
-        if i.endswith(".csv"):
-            files.append(i.removesuffix(".csv"))
-    
-    # Return the list of csv files
-    return files
 
 def main():
 

@@ -12,6 +12,8 @@ import matplotlib.pyplot as plt
 
 class temperature_data:
 
+    data_location = 'data/temperature/'
+
     def __init__(self,filename):
         """Loads data from a csv file."""
 
@@ -70,8 +72,8 @@ class temperature_data:
         img.seek(0)
         return img
 
-    @staticmethod
-    def create_html_list(data, template=(None, None)):
+    @classmethod
+    def create_html_list(cls, data, template=(None, None)):
         """Creates an HTML file listing all the given csv files"""
         html = ""
 
@@ -87,7 +89,7 @@ class temperature_data:
 
         # Concatenate a link to each csv file's graph
         for i in data:
-            html += f"<li><a onclick=\"document.querySelector('img').src = '/data/{i}';\">{i}</a></li>"
+            html += f"<li><a onclick=\"document.querySelector('img').src = '/{cls.data_location[:-1].replace('/', '-')}/{i}';\">{i}</a></li>"
         
         # Concatenate the end of the body and the document footer
         if template[1] is None:
@@ -98,12 +100,12 @@ class temperature_data:
         # Return the HTML document
         return html
 
-    @staticmethod
-    def get_csv_files(directory="data/"):
+    @classmethod
+    def get_csv_files(cls):
         """Returns a list of stored csv files"""
 
         # Get a list of all stored files
-        directory_list = os.listdir(directory)
+        directory_list = os.listdir(cls.data_location)
 
         # Filter out and store all of the csv files
         files = []

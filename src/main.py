@@ -21,6 +21,11 @@ class ytd_HTTPRequestHandler(http.server.BaseHTTPRequestHandler):
                 self.send_response(200)
                 self.end_headers()
                 self.wfile.write(html)
+            elif len(path) == 1 and path[0] == "DefaultGraph.png":
+                with open('src/DefaultGraph.png', 'rb') as img:
+                    self.send_response(200)
+                    self.end_headers()
+                    self.wfile.write(img.read())
             elif len(path) == 2 and path[0] == temperature_data.data_location[:-1].replace('/', '-') and path[1] in temperature_data.get_csv_files():
                 img = temperature_data(f"{temperature_data.data_location}{path[1]}.csv").get_graph()
                 

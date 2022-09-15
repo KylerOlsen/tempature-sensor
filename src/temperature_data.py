@@ -93,7 +93,7 @@ class temperature_data:
         
         # Concatenate the end of the body and the document footer
         if template[1] is None:
-            html += "</ul><img class=\"right\"/></div></body></html>"
+            html += "</ul><img class=\"right\" src=\"DefaultGraph.png\"/></div></body></html>"
         else:
             html += template[1]
         

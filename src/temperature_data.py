@@ -111,7 +111,7 @@ class temperature_data:
         files = []
         for i in directory_list:
             if i.endswith(".csv"):
-                files.append(i.removesuffix(".csv"))
+                files.append(i[:-4])
         
         # Return the list of csv files
         return files

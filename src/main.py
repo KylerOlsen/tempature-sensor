@@ -64,7 +64,7 @@ def main():
         'data location' : 'data/temperature/',
     }
 
-    if os.path.isfile(CONFIG_FILENAME):
+    if not os.path.isfile(CONFIG_FILENAME):
         with open(CONFIG_FILENAME) as configfile:
             config.read(configfile)
     with open(CONFIG_FILENAME, 'w') as configfile:

@@ -65,8 +65,8 @@ def main():
     }
 
     if os.path.isfile(CONFIG_FILENAME):
-        with open(CONFIG_FILENAME) as configfile:
-            config.read(configfile)
+        #with open(CONFIG_FILENAME) as configfile:
+        config.read(CONFIG_FILENAME)
     with open(CONFIG_FILENAME, 'w') as configfile:
         config.write(configfile)
 

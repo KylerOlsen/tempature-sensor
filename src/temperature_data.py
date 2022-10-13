@@ -89,11 +89,11 @@ class temperature_data:
 
         # Concatenate a link to each csv file's graph
         for i in data:
-            html += f"<li><a onclick=\"document.querySelector('img').src = '/{cls.data_location[:-1].replace('/', '-')}/{i}';\">{i}</a></li>"
+            html += f"<li><a onclick=\"document.querySelector('img').src = '/?graph={cls.data_location[:-1].replace('/', '-')}/{i}';\">{i}</a></li>"
         
         # Concatenate the end of the body and the document footer
         if template[1] is None:
-            html += "</ul><img class=\"right\" src=\"DefaultGraph.png\"/></div></body></html>"
+            html += "</ul><img class=\"right\" src=\"/?graph=DefaultGraph.png\"/></div></body></html>"
         else:
             html += template[1]
         

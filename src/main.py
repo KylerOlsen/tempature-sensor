@@ -6,7 +6,7 @@ import configparser
 import os
 
 # local imports
-from temperature_data import temperature_data
+from battery_data import battery_data
 
 class ytd_HTTPRequestHandler(http.server.BaseHTTPRequestHandler):
 
@@ -15,8 +15,8 @@ class ytd_HTTPRequestHandler(http.server.BaseHTTPRequestHandler):
             path = self.path[1:].split("/")
             #print(self.path,path,get_csv_files())
             if len(path) == 1 and path[0] in ["","index.html"]:
-                files = temperature_data.get_csv_files()
-                html = temperature_data.create_html_list(files).encode('utf-8')
+                files = battery_data.get_csv_files()
+                html = battery_data.create_html_list(files).encode('utf-8')
 
                 self.send_response(200)
                 self.end_headers()
@@ -26,8 +26,8 @@ class ytd_HTTPRequestHandler(http.server.BaseHTTPRequestHandler):
                     self.send_response(200)
                     self.end_headers()
                     self.wfile.write(img.read())
-            elif len(path) == 2 and path[0] == temperature_data.data_location[:-1].replace('/', '-') and path[1] in temperature_data.get_csv_files():
-                img = temperature_data(f"{temperature_data.data_location}{path[1]}.csv").get_graph()
+            elif len(path) == 2 and path[0] == battery_data.data_location[:-1].replace('/', '-') and path[1] in battery_data.get_csv_files():
+                img = battery_data(f"{battery_data.data_location}{path[1]}.csv").get_graph()
                 
                 self.send_response(200)
                 self.end_headers()
@@ -59,9 +59,9 @@ def main():
     config['DEFAULT'] = {
         'port' : 8080,
     }
-    config['Temperature'] = {
+    config['Battery'] = {
         'enabled' : False,
-        'data location' : 'data/temperature/',
+        'data location' : 'data/battery/',
     }
 
     if os.path.isfile(CONFIG_FILENAME):
@@ -72,10 +72,10 @@ def main():
 
     port = int(config['DEFAULT']['port'])
 
-    if config['Temperature']['enabled']:
-        temperature_data.data_location = config['Temperature']['data location']
-        if not os.path.isdir(temperature_data.data_location):
-            raise FileNotFoundError(f"Cannot find the path specified for tempature data: '{temperature_data.data_location}'")
+    if config['Battery']['enabled']:
+        battery_data.data_location = config['Battery']['data location']
+        if not os.path.isdir(battery_data.data_location):
+            raise FileNotFoundError(f"Cannot find the path specified for tempature data: '{battery_data.data_location}'")
 
     # Set up and start server
     httpd = http.server.ThreadingHTTPServer(('', port),ytd_HTTPRequestHandler)

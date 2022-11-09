@@ -1,5 +1,0 @@
-Show meta for batts
-Combine temp and batt
-Folders
-Zoom
-Accel

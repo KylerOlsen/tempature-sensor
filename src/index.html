@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta charset="UTF-8">
+    <title>Data Viewer</title>
+    <link rel="stylesheet" href="index.css"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js" integrity="sha512-ElRFoEQdI5Ht6kZvyzXhYG9NqjtkmlkfYk0wr6wHxU9JEHakS7UJZNeml5ALk+8IKlU6jDgMabC3vkumRokgJA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="index.js"></script>
+</head>
+<body>
+    <header>
+        <nav>
+            <!-- <a id="temp">Temperature</a> -->
+            <a id="batt">Battery</a>
+        </nav>
+    </header>
+    <main>
+        <span id="chartContainer">
+            <canvas id="chart"></canvas>
+        </span>
+        <span id="metadata">
+        </span>
+        <span id="fileTree">
+            Files
+        </span>
+    </main>
+</body>
+</html>

@@ -6,6 +6,7 @@ import configparser
 import os
 
 # local imports
+from temperature_data import temperature_data
 from battery_data import battery_data
 
 class ytd_HTTPRequestHandler(http.server.BaseHTTPRequestHandler):
@@ -14,24 +15,18 @@ class ytd_HTTPRequestHandler(http.server.BaseHTTPRequestHandler):
         try:
             path = self.path[1:].split("/")
             #print(self.path,path,get_csv_files())
-            if len(path) == 1 and path[0] in ["","index.html"]:
-                files = battery_data.get_csv_files()
-                html = battery_data.create_html_list(files).encode('utf-8')
-
-                self.send_response(200)
-                self.end_headers()
-                self.wfile.write(html)
-            elif len(path) == 1 and path[0] == "DefaultGraph.png":
-                with open('src/DefaultGraph.png', 'rb') as img:
+            if len(path) == 1 and path[0].lower() in ["",]:
+                with open("src/index.html",'rb') as data:
                     self.send_response(200)
                     self.end_headers()
-                    self.wfile.write(img.read())
-            elif len(path) == 2 and path[0] == battery_data.data_location[:-1].replace('/', '-') and path[1] in battery_data.get_csv_files():
-                img = battery_data(f"{battery_data.data_location}{path[1]}.csv").get_graph()
-                
-                self.send_response(200)
-                self.end_headers()
-                self.wfile.write(img.read())
+                    self.wfile.write(data.read())
+            elif len(path) == 1 and path[0].lower() in ["index.html","index.css","index.js","defaultgraph.png"]:
+                with open("src/"+path[0].lower(),'rb') as data:
+                    self.send_response(200)
+                    self.end_headers()
+                    self.wfile.write(data.read())
+            elif len(path) >= 1 and path[0].lower() == "battery":
+                battery_data.http(self)
             else:
                 self.send_response(404)
                 self.end_headers()
@@ -82,4 +77,6 @@ def main():
     httpd.serve_forever()
 
 if __name__ == "__main__":
+    # battery_data.data_location = 'data/'
+    # print(battery_data.get_csv_files())
     main()

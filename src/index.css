@@ -1,0 +1,51 @@
+main{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    flex-wrap: wrap;
+}
+
+#chartContainer {
+    position: relative;
+    max-width: 95vw;
+    flex-grow: 1;
+}
+
+#metadata:not(:empty) {
+    flex-basis: auto;
+}
+
+#metadata:empty {
+    flex-basis: auto;
+    min-width: 0;
+}
+
+#fileTree {
+    flex-basis: auto;
+}
+
+nav {
+    text-align: center;
+}
+
+@media (min-aspect-ratio: 1/1) {
+    main{
+        flex-direction: row-reverse;
+    }
+    
+    #chartContainer {
+        /* max-width: 60em; */
+        max-width: 50vw;
+        min-width: 40vw;
+    }
+    
+    #metadata:not(:empty) {
+        max-width: 25vw;
+        min-width: 10vw;
+    }
+    
+    #fileTree {
+        max-width: 20vw;
+        min-width: 10vw;
+    }
+}

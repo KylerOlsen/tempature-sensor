@@ -9,8 +9,11 @@ import datetime
 # installed imports
 import matplotlib.pyplot as plt
 
+# local imports
+from data import Data
 
-class temperature_data:
+
+class temperature_data(Data):
 
     data_location = 'data/temperature/'
 
@@ -51,6 +54,14 @@ class temperature_data:
             self._wifi_avg = sum(self._wireless_strength)//len(self._wireless_strength)
             self._wifi_min = min(self._wireless_strength)
             self._wifi_max = max(self._wireless_strength)
+        
+    def __dict__(self):
+        return {
+            "bat_volts_min":self._bat_volts_min,
+            "wifi_avg":self._wifi_avg,
+            "wifi_min":self._wifi_min,
+            "wifi_max":self._wifi_max,
+        }
 
     def get_graph(self):
         """Returns the graph for the data set as an image in a file-like object"""
@@ -71,47 +82,3 @@ class temperature_data:
         plt.savefig(img,format='png',bbox_inches='tight')
         img.seek(0)
         return img
-
-    @classmethod
-    def create_html_list(cls, data, template=(None, None)):
-        """Creates an HTML file listing all the given csv files"""
-        html = ""
-
-        # Concatenate the document header and the start of the body
-        if template[0] is None:
-            html += "<!DOCTYPE html><html><head><meta charset=\"utf-8\"/>\
-                <style>.container{display:grid;}.left{grid-column:1;}\
-                .right{grid-column:2;}</style></head>\
-                <body><div class=\"container\"><h1 class=\"left\">Select a data file:</h1>\
-                <ul class=\"left\">"
-        else:
-            html += template[0]
-
-        # Concatenate a link to each csv file's graph
-        for i in data:
-            html += f"<li><a onclick=\"document.querySelector('img').src = '/?graph={cls.data_location[:-1].replace('/', '-')}/{i}';\">{i}</a></li>"
-        
-        # Concatenate the end of the body and the document footer
-        if template[1] is None:
-            html += "</ul><img class=\"right\" src=\"/?graph=DefaultGraph.png\"/></div></body></html>"
-        else:
-            html += template[1]
-        
-        # Return the HTML document
-        return html
-
-    @classmethod
-    def get_csv_files(cls):
-        """Returns a list of stored csv files"""
-
-        # Get a list of all stored files
-        directory_list = os.listdir(cls.data_location)
-
-        # Filter out and store all of the csv files
-        files = []
-        for i in directory_list:
-            if i.endswith(".csv"):
-                files.append(i[:-4])
-        
-        # Return the list of csv files
-        return files

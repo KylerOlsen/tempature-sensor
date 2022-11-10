@@ -4,6 +4,7 @@
 import http.server
 import configparser
 import os
+import os.path
 from urllib.parse import urlparse
 
 # local imports
@@ -72,7 +73,7 @@ def main():
     port = int(config['DEFAULT']['port'])
 
     if config['Battery']['enabled']:
-        battery_data.data_location = config['Battery']['data location']
+        battery_data.data_location = os.path.expanduser(config['Battery']['data location'])
         if not os.path.isdir(battery_data.data_location):
             raise FileNotFoundError(f"Cannot find the path specified for tempature data: '{battery_data.data_location}'")
 

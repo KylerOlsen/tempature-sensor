@@ -63,7 +63,7 @@ class battery_data(Data):
         return img
     
     def get_json(self):
-        data = {"Filename" : self.filename}
+        data = {"Filename" : self.filename[len(self.data_location):]}
         for key, value in self.data.items():
             data[key] = value
         return json.dumps({"metadata" : data, "data" : self._voltage[950:1350]})

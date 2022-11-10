@@ -64,7 +64,7 @@ function updateMetadata(data) {
 }
 
 function getFileData(type, file) {
-    fetch(`${type}/${file}`).then(data => {
+    fetch(`${type}?data=${file}`).then(data => {
         return data.json();
     }).then(json => {
         updateChart(json["data"]);
@@ -93,7 +93,7 @@ function displayFiles(type, files, path, element) {
 }
 
 function getFiles(type) {
-    fetch(`${type}/files.json`).then(data => {
+    fetch(`${type}?files=true`).then(data => {
         return data.json();
     }).then(json => {
         document.querySelector("#fileTree").innerHTML = "";

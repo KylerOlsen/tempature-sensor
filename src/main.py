@@ -4,6 +4,7 @@
 import http.server
 import configparser
 import os
+from urllib.parse import urlparse
 
 # local imports
 from temperature_data import temperature_data
@@ -13,8 +14,7 @@ class ytd_HTTPRequestHandler(http.server.BaseHTTPRequestHandler):
 
     def do_GET(self):
         try:
-            path = self.path[1:].split("/")
-            #print(self.path,path,get_csv_files())
+            path = urlparse(self.path).path[1:].split("/")
             if len(path) == 1 and path[0].lower() in ["",]:
                 with open("src/index.html",'rb') as data:
                     self.send_response(200)

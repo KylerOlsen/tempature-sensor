@@ -4,6 +4,8 @@
 import os
 from abc import ABC, abstractmethod
 import json
+from urllib.parse import urlparse
+from urllib.parse import parse_qs
 
 
 class Data(ABC):
@@ -90,15 +92,18 @@ class Data(ABC):
     @classmethod
     def http(cls, request):
         files = cls.get_csv_files()
-        path = request.path[1:].split("/")[1:]
-        if len(path) == 1 and path[0].lower() in ["files","files.json"]:
+        url = urlparse(request.path)
+        path = url.path[1:].split("/")[1:]
+        query = parse_qs(url.query)
+        print(url,path,query)
+        if (len(path) == 1 and path[0].lower() in ["files","files.json"]) or (len(path) == 0 and 'files' in query and query['files'][0].lower() == "true"):
             data = json.dumps(cls.get_csv_filetree())
             
             request.send_response(200)
             request.end_headers()
             request.wfile.write(data.encode('utf-8'))
-        elif len(path) >= 1 and '/'.join(path) in files:
-            data = cls(f"{cls.data_location}/{'/'.join(path)}.csv").get_json()
+        elif len(path) == 0 and 'data' in query and query['data'][0] in files:
+            data = cls(f"{cls.data_location}/{query['data'][0]}.csv").get_json()
             
             request.send_response(200)
             request.end_headers()

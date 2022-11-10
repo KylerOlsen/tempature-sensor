@@ -103,7 +103,7 @@ function getFiles(type) {
 
 function main() {
     makeChart();
-    getFiles("battery");
+    getFiles("battery.php");
 
 }
 

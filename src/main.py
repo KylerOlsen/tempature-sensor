@@ -25,8 +25,12 @@ class ytd_HTTPRequestHandler(http.server.BaseHTTPRequestHandler):
                     self.send_response(200)
                     self.end_headers()
                     self.wfile.write(data.read())
-            elif len(path) >= 1 and path[0].lower() == "battery":
+            elif len(path) >= 1 and path[0].lower() in ["battery","battery.php"]:
                 battery_data.http(self)
+            elif len(path) >= 1 and path[0].lower() == "--exit--" and self.client_address[0] == '127.0.0.1':
+                self.send_response(200)
+                self.end_headers()
+                self.server.shutdown()
             else:
                 self.send_response(404)
                 self.end_headers()

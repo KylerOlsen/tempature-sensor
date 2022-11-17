@@ -63,7 +63,23 @@ class battery_data(Data):
         return img
     
     def get_json(self):
+        times = {
+            "Total Elapsed Time(s)" : "Total Elapsed Time",
+            "Elapsed Time(s)" : "Elapsed Time",
+            "Running Time(s)" : "Running Time",
+            "Not Running Time(s)" : "Not Running Time",
+            "Cranking Time(s)" : "Cranking Time",
+        }
         data = {"Filename" : self.filename[len(self.data_location):]}
         for key, value in self.data.items():
-            data[key] = value
+            if key in times:
+                v = int(float(value))
+                hours = v // 3600
+                minutes = (v // 60) % 60
+                seconds = v % 60
+                data[times[key]] = f"{hours}:{minutes:02}:{seconds:02}.{int(round((float(value)-v) * 100)):02} ({value}s)"
+            elif key == "Temperature":
+                data[key] = f"{(float(value) * 9 / 5) + 32:.1f}°F ({value}°C)"
+            else:
+                data[key] = value
         return json.dumps({"metadata" : data, "data" : self._voltage[950:1350]})

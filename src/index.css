@@ -22,10 +22,16 @@ main{
 
 #fileTree {
     flex-basis: auto;
+    overflow-y: scroll;
+    height: 90vh;
 }
 
 nav {
     text-align: center;
+}
+
+.file-selected {
+    background-color: lightgoldenrodyellow;
 }
 
 @media (min-aspect-ratio: 1/1) {

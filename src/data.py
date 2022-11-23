@@ -85,6 +85,7 @@ class Data(ABC):
             for i in files:
                 if i.endswith(".csv"):
                     current_tree['files'].append(i[:-4])
+            current_tree['files'].sort()
         
         # Return the list of csv files
         return file_tree

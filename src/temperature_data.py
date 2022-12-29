@@ -2,9 +2,9 @@
 
 # std imports
 import csv
-import os
 import io
 import datetime
+import json
 
 # installed imports
 import matplotlib.pyplot as plt
@@ -48,13 +48,13 @@ class temperature_data(Data):
                 self._bat_volts.append(float(line[3]))
                 # Line wireless strength
                 self._wireless_strength.append(int(line[4]))
-        
+
             # Calculate Battey and Wifi strength statistics
             self._bat_volts_min = min(self._bat_volts)
             self._wifi_avg = sum(self._wireless_strength)//len(self._wireless_strength)
             self._wifi_min = min(self._wireless_strength)
             self._wifi_max = max(self._wireless_strength)
-        
+
     def __dict__(self):
         return {
             "bat_volts_min":self._bat_volts_min,
@@ -76,9 +76,26 @@ class temperature_data(Data):
         ax.grid(True)
         labels = ax.get_xticklabels()
         plt.setp(labels, rotation=20, horizontalalignment='right')
-        
+
         # Saves the figure (graph) as a png into a file like object
         img = io.BytesIO()
         plt.savefig(img,format='png',bbox_inches='tight')
         img.seek(0)
         return img
+
+    def get_json(self):
+        data = {
+            "Filename" : self.filename[len(self.data_location):],
+            "Battery volts min" : self._bat_volts_min,
+            "WIFI max" : self._wifi_max,
+            "WIFI avg" : self._wifi_avg,
+            "WIFI min" : self._wifi_min,
+        }
+        temperature = []
+        for value in self._temperature:
+            temperature.append((float(value) * 9 / 5) + 32)
+        return json.dumps({"metadata" : data, "data" : temperature})
+
+    @staticmethod
+    def is_valid_name(name: str):
+        return name.endswith(".csv") and name.startswith("3")

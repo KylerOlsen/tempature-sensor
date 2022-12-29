@@ -14,6 +14,7 @@ from battery_data import battery_data, battery_event_data
 class ytd_HTTPRequestHandler(http.server.BaseHTTPRequestHandler):
 
     def do_GET(self):
+        print()
         try:
             path = urlparse(self.path).path[1:].split("/")
             if len(path) == 1 and path[0].lower() in ["",]:
@@ -33,6 +34,8 @@ class ytd_HTTPRequestHandler(http.server.BaseHTTPRequestHandler):
                     battery_event_data.http(self)
                 else:
                     battery_data.http(self)
+            elif len(path) >= 1 and path[0].lower() in ["temperature","temperature.php"]:
+                temperature_data.http(self)
             elif len(path) >= 1 and path[0].lower() == "--exit--" and self.client_address[0] == '127.0.0.1':
                 self.send_response(200)
                 self.end_headers()

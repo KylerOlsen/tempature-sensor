@@ -83,6 +83,10 @@ class battery_data(Data):
                 data[key] = value
         return json.dumps({"metadata" : data, "data" : self._voltage[950:1350]})
 
+    @staticmethod
+    def is_valid_name(name: str):
+        return name.endswith(".csv") and name.startswith("4")
+
 
 class battery_event_data(battery_data):
 

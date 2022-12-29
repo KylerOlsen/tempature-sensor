@@ -16,7 +16,7 @@ class Data(ABC):
     def __init__(self,filename):
         """Loads data from a csv file."""
         self.filename = filename
-    
+
     @abstractmethod
     def __dict__(self): pass
 
@@ -46,13 +46,13 @@ class Data(ABC):
     #     # Concatenate a link to each csv file's graph
     #     for i in data:
     #         html += f"<li><a onclick=\"document.querySelector('img').src = '/?graph={cls.data_location[:-1].replace('/', '-')}/{i}';\">{i}</a></li>"
-        
+
     #     # Concatenate the end of the body and the document footer
     #     if template[1] is None:
     #         html += "</ul><img class=\"right\" src=\"/?graph=DefaultGraph.png\"/></div></body></html>"
     #     else:
     #         html += template[1]
-        
+
     #     # Return the HTML document
     #     return html
 
@@ -66,9 +66,12 @@ class Data(ABC):
             for i in files:
                 if i.endswith(".csv"):
                     all_files.append(root[len(cls.data_location):].replace('\\','/') + '/' + i[:-4])
-        
+
         # Return the list of csv files
         return all_files
+
+    @staticmethod
+    def is_valid_name(name): return name.endswith(".csv")
 
     @classmethod
     def get_csv_filetree(cls):
@@ -83,10 +86,10 @@ class Data(ABC):
             for i in folders:
                 current_tree['folders'][i] = {"folders":{},"files":[]}
             for i in files:
-                if i.endswith(".csv"):
+                if cls.is_valid_name(i):
                     current_tree['files'].append(i[:-4])
             current_tree['files'].sort()
-        
+
         # Return the list of csv files
         return file_tree
 
@@ -99,17 +102,16 @@ class Data(ABC):
         print(url,path,query)
         if (len(path) == 1 and path[0].lower() in ["files","files.json"]) or (len(path) == 0 and 'files' in query and query['files'][0].lower() == "true"):
             data = json.dumps(cls.get_csv_filetree())
-            
+
             request.send_response(200)
             request.end_headers()
             request.wfile.write(data.encode('utf-8'))
         elif len(path) == 0 and 'data' in query and query['data'][0] in files:
             data = cls(f"{cls.data_location}/{query['data'][0]}.csv").get_json()
-            
+
             request.send_response(200)
             request.end_headers()
             request.wfile.write(data.encode('utf-8'))
         else:
             request.send_response(404)
             request.end_headers()
-            

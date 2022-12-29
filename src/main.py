@@ -5,11 +5,11 @@ import http.server
 import configparser
 import os
 import os.path
-from urllib.parse import urlparse
+from urllib.parse import parse_qs, urlparse
 
 # local imports
 from temperature_data import temperature_data
-from battery_data import battery_data
+from battery_data import battery_data, battery_event_data
 
 class ytd_HTTPRequestHandler(http.server.BaseHTTPRequestHandler):
 
@@ -27,7 +27,12 @@ class ytd_HTTPRequestHandler(http.server.BaseHTTPRequestHandler):
                     self.end_headers()
                     self.wfile.write(data.read())
             elif len(path) >= 1 and path[0].lower() in ["battery","battery.php"]:
-                battery_data.http(self)
+                url = urlparse(self.path)
+                query = parse_qs(url.query)
+                if 'data' in query and query['data'][0].endswith("EventData"):
+                    battery_event_data.http(self)
+                else:
+                    battery_data.http(self)
             elif len(path) >= 1 and path[0].lower() == "--exit--" and self.client_address[0] == '127.0.0.1':
                 self.send_response(200)
                 self.end_headers()

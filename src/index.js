@@ -26,9 +26,66 @@ class Chart_File {
         if (current_selection) current_selection.element.classList.remove("file-selected");
         this.element.classList.add("file-selected");
         current_selection = this;
-        getFileData(this.type, this.path+'/'+this.file_name);
+        this.getFileData();
     }
-    
+
+    getFileData() {
+        fetch(`${this.type}?data=${this.path+'/'+this.file_name}`).then(data => {
+            return data.json();
+        }).then(json => {
+            updateChart(json["data"]);
+            this.updateMetadata(json["metadata"]);
+        })
+    }
+
+    updateMetadata(data) {
+        let element = document.createElement("ul");
+        for (let [key, value] of Object.entries(data)) {
+            let new_element = document.createElement("li");
+            new_element.innerText = `${key} : ${value}`
+            element.appendChild(new_element);
+        }
+        document.querySelector('#metadata').innerHTML = "";
+        document.querySelector('#metadata').appendChild(element);
+    }
+}
+
+class EventData_File extends Chart_File {
+
+    getFileData() {
+        fetch(`${this.type}?data=${this.path+'/'+this.file_name}`).then(data => {
+            return data.json();
+        }).then(json => {
+            document.querySelector("#chartContainer").classList.add("hideChart");
+            this.updateMetadata(json["data"]);
+        })
+    }
+
+    updateMetadata(data) {
+        let table = document.createElement("table");
+        let table_body = document.createElement("tbody");
+        let table_header = document.createElement("thead");
+        let table_header_row = document.createElement("tr");
+        for (let [key, value] of Object.entries(data)) {
+            let table_element = document.createElement("th");
+            table_element.innerText = `${key}`
+            table_header_row.appendChild(table_element);
+        }
+        table_header.appendChild(table_header_row);
+        table.appendChild(table_header);
+        for (let i = 0; i < data['datetime'].length; i++) {
+            let table_row = document.createElement("tr");
+            for (let [key, value] of Object.entries(data)) {
+                let table_element = document.createElement("td");
+                table_element.innerText = `${value[i]}`
+                table_row.appendChild(table_element);
+            }
+            table_body.appendChild(table_row);
+        }
+        table.appendChild(table_body);
+        document.querySelector('#metadata').innerHTML = "";
+        document.querySelector('#metadata').appendChild(table);
+    }
 }
 
 function makeChart() {
@@ -41,7 +98,7 @@ function makeChart() {
     let labels = [];
     for (let i = 0; i < raw_data.length; i++)
         labels.push(i);
-    
+
     let data = {
         labels: labels,
         datasets: [{
@@ -51,7 +108,7 @@ function makeChart() {
             data: raw_data,
         }]
     };
-    
+
     let config = {
         type: 'line',
         data: data,
@@ -67,7 +124,7 @@ function makeChart() {
             },
         }
     };
-    
+
     chart = new Chart(
         document.querySelector('#chart'),
         config
@@ -75,10 +132,11 @@ function makeChart() {
 }
 
 function updateChart(raw_data) {
+    document.querySelector("#chartContainer").classList.remove("hideChart");
     let labels = [];
     for (let i = 0; i < raw_data.length; i++)
         labels.push(i);
-    
+
     chart.data = {
         labels: labels,
         datasets: [{
@@ -89,26 +147,6 @@ function updateChart(raw_data) {
         }]
     };
     chart.update("none");
-}
-
-function updateMetadata(data) {
-    let element = document.createElement("ul");
-    for (let [key, value] of Object.entries(data)) {
-        let new_element = document.createElement("li");
-        new_element.innerText = `${key} : ${value}`
-        element.appendChild(new_element);
-    }
-    document.querySelector('#metadata').innerHTML = "";
-    document.querySelector('#metadata').appendChild(element);
-}
-
-function getFileData(type, file) {
-    fetch(`${type}?data=${file}`).then(data => {
-        return data.json();
-    }).then(json => {
-        updateChart(json["data"]);
-        updateMetadata(json["metadata"]);
-    })
 }
 
 function displayFiles(type, files, path, element) {
@@ -125,7 +163,10 @@ function displayFiles(type, files, path, element) {
     let file_list = document.createElement("ul");
     element.appendChild(file_list);
     for (let value of files.files) {
-        current_file = new Chart_File(type, value, path, file_list);
+        if (value.endsWith("EventData"))
+            current_file = new EventData_File(type, value, path, file_list);
+        else
+            current_file = new Chart_File(type, value, path, file_list);
         if (previous_file) {
             previous_file.next = current_file;
             current_file.prev = previous_file;
@@ -146,10 +187,16 @@ function getFiles(type) {
 function main() {
     makeChart();
     getFiles("battery.php");
-    window.addEventListener("keyup", (event) => {
-        if (event.key === "ArrowUp" && current_selection && current_selection.prev) current_selection.prev.click();
-        if (event.key === "ArrowDown" && current_selection && current_selection.next) current_selection.next.click();
-      });
+    window.addEventListener("keydown", (event) => {
+        if (event.key === "ArrowUp" && current_selection && current_selection.prev) {
+            current_selection.prev.click();
+            event.preventDefault();
+        }
+        if (event.key === "ArrowDown" && current_selection && current_selection.next) {
+            current_selection.next.click();
+            event.preventDefault();
+        }
+    });
 }
 
 window.addEventListener('load', main);

@@ -4,7 +4,7 @@
 import csv
 # import os
 import io
-# import datetime
+import datetime
 import json
 
 # installed imports
@@ -21,7 +21,6 @@ class battery_data(Data):
     def __init__(self,filename):
         """Loads data from a csv file."""
 
-
         # Opens the file and initilazes varables to load data into
         with open(filename, 'r') as csv_file:
             csv_reader = csv.reader(csv_file)
@@ -35,10 +34,10 @@ class battery_data(Data):
                     self.data[line[0]] = line[1]
                 elif len(line) == 1 and line[0] == "Voltage":
                     break
-            
+
             for line in csv_reader:
                 self._voltage.append(float(line[0]))
-    
+
     def __dict__(self):
         return self.data
 
@@ -55,13 +54,13 @@ class battery_data(Data):
         ax.grid(True)
         labels = ax.get_xticklabels()
         plt.setp(labels, rotation=20, horizontalalignment='right')
-        
+
         # Saves the figure (graph) as a png into a file like object
         img = io.BytesIO()
         plt.savefig(img,format='png',bbox_inches='tight')
         img.seek(0)
         return img
-    
+
     def get_json(self):
         times = {
             "Total Elapsed Time(s)" : "Total Elapsed Time",
@@ -83,3 +82,82 @@ class battery_data(Data):
             else:
                 data[key] = value
         return json.dumps({"metadata" : data, "data" : self._voltage[950:1350]})
+
+
+class battery_event_data(battery_data):
+
+    def __init__(self,filename):
+        """Loads data from a csv file."""
+
+        # Opens the file and initilazes varables to load data into
+        with open(filename, 'r') as csv_file:
+            csv_reader = csv.reader(csv_file)
+            self.filename = filename
+            self._datetime = []
+            self._total_elapsed = []
+            self._elapsed = []
+            self._event = []
+            self._vmax = []
+            self._vave = []
+            self._vmin = []
+            self._tmax = []
+            self._tave = []
+            self._tmin = []
+
+            # Loads in the data, one line at a time
+            for line in csv_reader:
+                # Line date and time
+                self._datetime.append(datetime.datetime.fromisoformat(line[0]))
+                # Line total elapsed time
+                self._total_elapsed.append(float(line[1]))
+                # Line elapsed time
+                self._elapsed.append(float(line[2]))
+                # Line event name
+                self._event.append(line[3])
+                # Line vmax
+                self._vmax.append(float(line[4]))
+                # Line vave
+                self._vave.append(float(line[5]))
+                # Line vmin
+                self._vmin.append(float(line[6]))
+                # Line tmax
+                self._tmax.append(float(line[7]))
+                # Line tave
+                self._tave.append(float(line[8]))
+                # Line tmin
+                self._tmin.append(float(line[9]))
+
+    def __dict__(self):
+        return self.data
+
+    def get_json(self):
+        date_time = []
+        for i in range(len(self._datetime)):
+            date_time.append(self._datetime[i].isoformat())
+        total_elapsed = []
+        for i in range(len(self._total_elapsed)):
+            v = int(float(self._total_elapsed[i]))
+            hours = v // 3600
+            minutes = (v // 60) % 60
+            seconds = v % 60
+            total_elapsed.append(f"{hours}:{minutes:02}:{seconds:02}.{int(round((float(self._total_elapsed[i])-v) * 100)):02} ({self._total_elapsed[i]}s)")
+        elapsed = []
+        for i in range(len(self._elapsed)):
+            v = int(float(self._elapsed[i]))
+            hours = v // 3600
+            minutes = (v // 60) % 60
+            seconds = v % 60
+            elapsed.append(f"{hours}:{minutes:02}:{seconds:02}.{int(round((float(self._elapsed[i])-v) * 100)):02} ({self._elapsed[i]}s)")
+        data = {
+            "datetime" : date_time,
+            "total_elapsed" : total_elapsed,
+            "elapsed" : elapsed,
+            "event" : self._event,
+            "vmax" : self._vmax,
+            "vave" : self._vave,
+            "vmin" : self._vmin,
+            "tmax" : self._tmax,
+            "tave" : self._tave,
+            "tmin" : self._tmin,
+        }
+        return json.dumps({"metadata" : {"Filename" : self.filename[len(self.data_location):]}, "data" : data})

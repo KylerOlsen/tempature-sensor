@@ -5,10 +5,20 @@ main{
     flex-wrap: wrap;
 }
 
+table, td {
+    border: 1px solid #333;
+}
+
 #chartContainer {
     position: relative;
     max-width: 95vw;
     flex-grow: 1;
+}
+
+#chartContainer.hideChart {
+    display: none;
+    flex-basis: auto;
+    min-width: 0;
 }
 
 #metadata:not(:empty) {
@@ -35,21 +45,21 @@ nav {
 }
 
 @media (min-aspect-ratio: 1/1) {
-    main{
+    main {
         flex-direction: row-reverse;
     }
-    
+
     #chartContainer {
         /* max-width: 60em; */
         max-width: 50vw;
         min-width: 40vw;
     }
-    
+
     #metadata:not(:empty) {
-        max-width: 25vw;
+        /* max-width: 25vw; */
         min-width: 10vw;
     }
-    
+
     #fileTree {
         max-width: 20vw;
         min-width: 10vw;

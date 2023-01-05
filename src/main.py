@@ -67,6 +67,10 @@ def main():
     config['DEFAULT'] = {
         'port' : 8080,
     }
+    config['Temperature'] = {
+        'enabled' : False,
+        'data location' : 'data/temperature/',
+    }
     config['Battery'] = {
         'enabled' : False,
         'data location' : 'data/battery/',
@@ -79,6 +83,11 @@ def main():
         config.write(configfile)
 
     port = int(config['DEFAULT']['port'])
+
+    if config['Temperature']['enabled']:
+        temperature_data.data_location = os.path.expanduser(config['Battery']['data location'])
+        if not os.path.isdir(temperature_data.data_location):
+            raise FileNotFoundError(f"Cannot find the path specified for tempature data: '{temperature_data.data_location}'")
 
     if config['Battery']['enabled']:
         battery_data.data_location = os.path.expanduser(config['Battery']['data location'])

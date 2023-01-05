@@ -31,11 +31,18 @@ class File {
 
 class Chart_File extends File {
 
+    click() {
+        if (current_selection) current_selection.element.classList.remove("file-selected");
+        this.element.classList.add("file-selected");
+        current_selection = this;
+        this.getFileData();
+    }
+
     getFileData() {
         fetch(`${this.type}?data=${this.path+'/'+this.file_name}`).then(data => {
             return data.json();
         }).then(json => {
-            updateChart(json["data"]);
+            this.updateChart(json["data"]);
             this.updateMetadata(json["metadata"]);
         })
     }
@@ -113,6 +120,13 @@ class Battery_Chart_File extends Chart_File {
 }
 
 class Battery_EventData_File extends File {
+
+    click() {
+        if (current_selection) current_selection.element.classList.remove("file-selected");
+        this.element.classList.add("file-selected");
+        current_selection = this;
+        this.getFileData();
+    }
 
     getFileData() {
         fetch(`${this.type}?data=${this.path+'/'+this.file_name}`).then(data => {

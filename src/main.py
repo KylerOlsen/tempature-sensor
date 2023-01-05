@@ -10,6 +10,7 @@ from urllib.parse import parse_qs, urlparse
 # local imports
 from temperature_data import temperature_data
 from battery_data import battery_data, battery_event_data
+from acceleration_data import acceleration_data
 
 class ytd_HTTPRequestHandler(http.server.BaseHTTPRequestHandler):
 
@@ -27,6 +28,8 @@ class ytd_HTTPRequestHandler(http.server.BaseHTTPRequestHandler):
                     self.send_response(200)
                     self.end_headers()
                     self.wfile.write(data.read())
+            elif len(path) >= 1 and path[0].lower() in ["temperature","temperature.php"]:
+                temperature_data.http(self)
             elif len(path) >= 1 and path[0].lower() in ["battery","battery.php"]:
                 url = urlparse(self.path)
                 query = parse_qs(url.query)
@@ -34,8 +37,8 @@ class ytd_HTTPRequestHandler(http.server.BaseHTTPRequestHandler):
                     battery_event_data.http(self)
                 else:
                     battery_data.http(self)
-            elif len(path) >= 1 and path[0].lower() in ["temperature","temperature.php"]:
-                temperature_data.http(self)
+            elif len(path) >= 1 and path[0].lower() in ["acceleration","acceleration.php"]:
+                acceleration_data.http(self)
             elif len(path) >= 1 and path[0].lower() == "--exit--" and self.client_address[0] == '127.0.0.1':
                 self.send_response(200)
                 self.end_headers()
@@ -75,6 +78,10 @@ def main():
         'enabled' : False,
         'data location' : 'data/battery/',
     }
+    config['Acceleration'] = {
+        'enabled' : False,
+        'data location' : 'data/acceleration/',
+    }
 
     if os.path.isfile(CONFIG_FILENAME):
         #with open(CONFIG_FILENAME) as configfile:
@@ -85,14 +92,19 @@ def main():
     port = int(config['DEFAULT']['port'])
 
     if config['Temperature']['enabled']:
-        temperature_data.data_location = os.path.expanduser(config['Battery']['data location'])
+        temperature_data.data_location = os.path.expanduser(config['Temperature']['data location'])
         if not os.path.isdir(temperature_data.data_location):
             raise FileNotFoundError(f"Cannot find the path specified for tempature data: '{temperature_data.data_location}'")
 
     if config['Battery']['enabled']:
         battery_data.data_location = os.path.expanduser(config['Battery']['data location'])
         if not os.path.isdir(battery_data.data_location):
-            raise FileNotFoundError(f"Cannot find the path specified for tempature data: '{battery_data.data_location}'")
+            raise FileNotFoundError(f"Cannot find the path specified for battery data: '{battery_data.data_location}'")
+
+    if config['Acceleration']['enabled']:
+        acceleration_data.data_location = os.path.expanduser(config['Acceleration']['data location'])
+        if not os.path.isdir(acceleration_data.data_location):
+            raise FileNotFoundError(f"Cannot find the path specified for acceleration data: '{acceleration_data.data_location}'")
 
     # Set up and start server
     httpd = http.server.ThreadingHTTPServer(('', port),ytd_HTTPRequestHandler)
